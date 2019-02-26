@@ -1,0 +1,25 @@
+@ WORD		/^'{0,1}[a-zA-Z]+.*/;
+@ TERMINAL      * !< *;
+@ NP		/^NP/;
+@ VP            /^VP/;
+@ PP            /^PP/;
+@ DISFL         /EDITED|UH|PRN|-UNF/;
+@ PPPP        	(@VP=VP1 < (@PP=PP1 !<< -NONE- $.. (@PP=PP2 !<< -NONE- !$ (@PP != =PP1) !,, (@TERMINAL ,, =PP1 !>> (@DISFL >> =VP1)))));
+@ COMMA		/\,/;
+@ OR		or;
+@ SOME		some !>> @DISFL;
+@ PART	/^((bit|type|sort|piece|part|lot|kind|number|form|group|amount|handful|handfull|ten|hundred|thousand|million)s{0,1})$|(bunch|bunches|one|some|couple|few|most|all|half|halves|%)$/;
+
+@ NP_HEAD	* > /^NP/ < (* !< *) !>> EDITED
+  		 [= (NN|NNP|NNPS|NNS|NX|JJR !$.. NN|NNP|NNPS|NNS|NX|JJR)
+		| = (/^NP/ !$.. /^NP/|NN|NNP|NNPS|NNS|NX|JJR) 
+		| = (ADJP|PRP !$.. ADJP|PRP|/^NP/|NN|NNP|NNPS|NNS|NX|JJR)
+		| = (CD !$.. CD|ADJP|PRP|/^NP/|NN|NNP|NNPS|NNS|NX|JJR)
+		| = (JJ|JJS|RB|QP !$.. JJ|JJS|RB|QP|CD|ADJP|PRP|/^NP/|NN|NNP|NNPS|NNS|NX|JJR)
+		| = (* !$.. *)];
+
+@ HEADFINDER	*=head [= ((@NP_HEAD) > (@NP > (/^PP/ < (IN < of) $ (@NP << ((@NP_HEAD) != =head < @PART)))))
+  		| = ((@NP_HEAD) !< ((@PART) > (* > (@NP $ (/^PP/ < (IN < of) !< SBAR-NOM)))))];
+@ HEDGE		or . /^(anything|whatever|so|something|what|kind of)$/;
+@ NOHEDGE	or !. /^(anything|whatever|so|something|what|that kind of thing)$/;
+@ NUMBER	/^(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred|thousand|million)/;

@@ -1,0 +1,82 @@
+---
+title: Preliminary analysis of 70 randomly sampled, annotated 'or' cases from the
+  Switchboard
+author: "jdegen"
+date: "June 27, 2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+Analyze random sample of 70 cases from most inclusive "or" database with detailed annotation by Neele and Judith. 
+
+We start with exclusion of cases that aren't interesting for implicature purposes. We exclude all fragments, sentences with more than one "or", hedges, and idioms. By "fragment" we mean utterances that aren't full sentences (e.g., "christopher reeve or mike douglas." or "recurrent crimes like serial rapists or serial murderers or whatever."). Sentences with more than one "or" are typically either disfluencies or have more than one disjunct. Hedges are cases where "or" is followed by an empty term like "something", "whatever", "anything", etc, (e.g., "so. well, uh, did you hear about that killeen massacre or whatever.", "they seem to be, i mean, listen better or something."). Idioms are cases like "more or less"; in fact, we only have one of these in the database. After these exclusions, we're left with 30 potentially useful cases (ie, 43% of the annotated cases).
+
+Load dataset and clean columns (get rid of notes columns and get only the annotated first 70 of 200 randomly sampled).
+```{r}
+d = read.csv("/Users/titlis/Dropbox/switchboard/Annotation/random200_to_annotate_jd.csv")
+d$Notes = NULL
+d$JudithNotes = NULL
+d = droplevels(d[1:70,])
+nrow(d)
+```
+
+Exclude 11 cases of fragments (ie no full sentences, eg "but no big mountains or anything.")
+
+```{r}
+d = droplevels(d[d$SpeechAct != "Fragment",])
+nrow(d) 
+```
+
+Exclude 14 cases with more than 2 disjuncts (with more than 1 "or")
+
+```{r}
+d = droplevels(d[d$ThreeDisjuncts != "X",])
+nrow(d)
+```
+
+Exclude 14 cases of hedges (ie with second disjunct "anything", "whatever", "something", "something like that", etc)
+
+```{r}
+d = droplevels(d[d$SpeechAct != "Hedge",])
+nrow(d) 
+```
+
+Exclude 1 case of idioms ("more or less")
+
+```{r}
+d = droplevels(d[d$SpeechAct != "Idiom",])
+nrow(d) 
+```
+In the end ```nrow(d)``` of the 70 cases are still potentially usable.
+
+Counts of implicatures arising with different syntactic disjunct type (not too informative):
+
+```{r}
+table(d$ConstituentType,d$ImplicatureArises)
+prop.table(table(d$ConstituentType,d$ImplicatureArises),mar=c(1))
+```
+
+Counts of implicature arising from world knowledge alone -- of the "yes"s, 9 (or more, if we count uncertain cases) are due to world knowledge, 3 are analytic ("...or not"), some are unclear, and only 3 are clearly not world knowledge "implicatures".
+
+```{r}
+table(d$WorldKnowledgeImplicature,d$ImplicatureArises)
+```
+
+Sentences with "implicatures" that aren't due to world knowledge -- but none of these feel like real "but not both" implicatures (1 embedded under "i don't know if", 1 embedded under "i can", 1 embedded in question):
+
+```{r}
+d[d$WorldKnowledgeImplicature == "no" & d$ImplicatureArises == "yes",]$Sentence
+```
+
+Sentences with "implicatures" that are due to world knowledge:
+
+```{r}
+d[d$WorldKnowledgeImplicature == "yes" & d$ImplicatureArises == "yes",]$Sentence # most of these include numerals
+```
+
+Sentences with "implicatures" where the implicature is the point:
+
+```{r}
+d[d$ImplicatureIsPoint == "yes" & d$ImplicatureArises == "yes",]$Sentence # mostly cases with explicit contrast
+```

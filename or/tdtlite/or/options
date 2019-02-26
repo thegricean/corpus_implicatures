@@ -1,0 +1,16 @@
+data=/home/neele/XPRAG/tdtlite/or/data
+results=/home/neele/XPRAG/tdtlite/or/results
+
+init ID
+add StringVar Sentence
+add StringVar rightDisjunct
+add CategoricalVar HasPrecedingContent=yes:Preceding,no:NoPreceding
+add CategoricalVar HasFollowingContent=yes:Following,no:NoFollowing
+add CategoricalVar IsInDisfluency=yes:InDisfl,no:NotInDisfl
+add CategoricalVar HasMoreThanOneOr=yes:doubleOr,no:noDoubleOr
+add CategoricalVar HasHedge=yes:hedge,no:noHedge
+add CategoricalVar containsNumber=yes:number,no:noNumber
+add CategoricalVar eitherPresent=yes:either,no:noEither
+add CategoricalVar orNotPresent=yes:orNot,no:notOrNot
+add CategoricalVar sentenceHasVP=yes:VP,no:noVP
+add NodeVar head
