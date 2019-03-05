@@ -1,6 +1,6 @@
 
 var path = 'https://raw.githubusercontent.com/leylakursat/some_replacement/master/pilot_corpus.txt';
-//var path_attention = 'https://raw.githubusercontent.com/leylakursat/some_replacement/master/attention_check_items.txt';
+var path_attention = 'https://raw.githubusercontent.com/leylakursat/some_replacement/master/attention_check_items.txt';
 
 
 function get_data(fullpath) {
@@ -18,8 +18,8 @@ function generate_stim() {
    
     var contents = get_data(path);
     
-   // var attention_check = get_data(path_attention);
-   // contents = contents + attention_check;
+    var attention_check = get_data(path_attention);
+    contents = contents + attention_check;
     
     var raw = contents;
         var rows = raw.split('\n');

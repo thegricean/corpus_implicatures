@@ -1,30 +1,59 @@
 library(tidyverse)
-#pilot = read.csv("repos/impl35_some/pilot/pilot.csv", header = TRUE)
-pilot = read.csv("pilot.csv", header = TRUE)
+
+df = read.csv("pilot.csv", header = TRUE)
 source("helpers.R")
 
-#ALL TRIALS
-ggplot(pilot,aes(x=rating))+
+# EXCLUDE WORKERID = 0,1,2 --> THEY WEREN'T PAID
+df <-df[!(df$workerid=="0"| df$workerid=="1"| df$workerid=="2"),]
+
+# ALL TRIALS
+ggplot(df,aes(x=rating))+
   geom_histogram()+
   labs(title = "All Ratings")+
   theme(plot.title = element_text(hjust =0.5))
 
-#PRACTICE TRIALS
-practice = pilot %>% 
+# PRACTICE TRIALS
+practice = df %>% 
   filter(str_detect(tgrep_id, "example"))
-
-ggplot(practice, aes(x=rating,fill=as.factor(tgrep_id))) +
-  geom_density(alpha=.5)
 
 ggplot(practice,aes(x=rating))+
   geom_histogram()+
-  facet_wrap(~tgrep_id)+
-  labs(title = "Ratings for practice trials")+
+  facet_wrap(~tgrep_id) +
+  labs(title = "Ratings for practice trials") +
   theme(plot.title = element_text(hjust =0.5))
 
-#TARGET TRIALS
-sentences = pilot %>% 
+# how many judgments per item?
+table(df$tgrep_id)
+table(practice$tgrep_id, practice$workerid)
+
+# ATTENTION CHECKS 
+attn = df %>% 
+  filter(str_detect(tgrep_id, "control"))
+
+ggplot(attn,aes(x=rating))+
+  geom_histogram()+
+  facet_wrap(~tgrep_id) +
+  labs(title = "Ratings for attention checks") +
+  theme(plot.title = element_text(hjust =0.5))
+
+bad_turker1 = attn %>% 
+  filter(tgrep_id == "control1" & rating < 0.5)
+bad_turker2 = attn %>% 
+  filter(tgrep_id == "control2" & rating > 0.5) 
+bad_turker3 = attn %>% 
+  filter(tgrep_id == "control3" & rating < 0.5)
+bad_turker4 = attn %>% 
+  filter(tgrep_id == "control4" & rating > 0.5)
+bad_turker <- rbind(bad_turker1,bad_turker2,bad_turker3,bad_turker4)
+
+non_target = rbind(practice,bad_turker)
+table(non_target$tgrep_id, non_target$workerid)
+
+# TARGET TRIALS
+sentences = df %>% 
   filter(str_detect(tgrep_id, "example", negate = TRUE))
+sentences = sentences %>% 
+  filter(str_detect(tgrep_id, "control", negate = TRUE))
 
 ggplot(sentences,aes(x=rating))+
   geom_histogram()+
@@ -34,17 +63,17 @@ ggplot(sentences,aes(x=rating))+
 ggplot(sentences, aes(x=rating,fill=tgrep_id)) +
   geom_density(alpha=.5)
 
-#for each item
+# for each item
 ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~tgrep_id)
 
-#for each participant
+# for each participant
 ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~workerid)
 
-#overall distribution of responses
+# overall distribution of responses
 agr = sentences %>%
   group_by(tgrep_id) %>%
   summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating)) %>%
@@ -74,5 +103,3 @@ ggplot(sentences,aes(x=tgrep_id, fill=strange))+
        x = "TGrep ID")+
   theme(plot.title = element_text(hjust =0.5))
 
-# how many judgments per item?
-table(pilot$tgrep_id)

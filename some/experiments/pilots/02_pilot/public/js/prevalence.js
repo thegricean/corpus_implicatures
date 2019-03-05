@@ -253,7 +253,7 @@ init_sliders : function() {
       exp.go();}
       else if (exp.has_val == true && exp.sliderPost > 0.5) {
       this.log_responses();
-  alert("If Speaker #2 is not sure if some of the things in the fridge went bad so they can't know if all the things in the fridge went bad. Please set the slider closer to 'speaker doesn't know'.");
+  alert("If Speaker #2 is not sure whether some of the things in the fridge went bad, they don't know whether all the things in the fridge went bad. Please set the slider closer to 'speaker doesn't know'.");
   }
       else {
   alert("Please set the slider.");
@@ -374,7 +374,7 @@ log_responses : function() {
 	// contexthtml = contexthtml.replace(/E_S/g, "");
 	// contexthtml = contexthtml.replace(/(\\\[| \\\+|\\\])/g, "");
     contexthtml = contexthtml.replace(/--n((\d+)|[a-z]+|(\d+))+/g, "");
-    contexthtml = contexthtml.replace(/###/g, " ");
+    contexthtml = contexthtml.replace(/.###/g, " ");
     contexthtml = contexthtml.replace(/-N((\d+)|[A-Z]+)+/g, "");
 	
 	// FIX THIS!
@@ -501,7 +501,7 @@ function init() {
 
   repeatWorker = false;
   (function(){
-  var ut_id = "2fba4ec850abfc50d4546791d606fb57";  // remember to replace this!
+  var ut_id = "28169c02232bceee197d64c4861b018a";  // remember to replace this!
   if (UTWorkerLimitReached(ut_id)) {
     $('.slide').empty();
     repeatWorker = true;
