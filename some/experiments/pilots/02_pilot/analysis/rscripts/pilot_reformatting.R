@@ -1,7 +1,8 @@
-#REFORMAT DATAFRAME --> TRIAL INFO
-library(tidyverse)
-# merge_resultes.R creates results_merged.cvs
+# Uses example-trials.csv to create new csv with two seperate columns for "rating" and "strange sentence --> pilot.csv
 
+library(tidyverse)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 pilot <- read.csv("example-trials.csv")
 
@@ -14,4 +15,5 @@ colnames(pilot)[colnames(pilot)=="rating2"] <- "rating"
 colnames(pilot)[colnames(pilot)=="strange2"] <- "strange"
 pilot$Answer.condition <- NULL
 pilot <- pilot[c(5,1,6,7,3,4)]
+
 write.csv(pilot, file = "pilot.csv")

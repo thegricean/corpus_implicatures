@@ -1,4 +1,6 @@
 library(tidyverse)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 d = read.csv("example-subject_information.csv", header = TRUE)
 
 d <- d[c(8,1,2,3,4,5,6,7,9)]
@@ -16,7 +18,7 @@ ggplot(d, aes(x=fairprice)) +
 # overall assessment
 ggplot(d, aes(x=asses)) +
   geom_histogram(stat="count")
-table(d$asses)
+table(d$asses, d$workerid)
 
 # enjoyment (3 levels)
 ggplot(d, aes(x=enjoyment)) +
@@ -41,5 +43,20 @@ ggplot(d, aes(x=language)) +
 # average time 
 df = read.csv("pilot.csv", header = TRUE)
 df <-df[!(df$workerid=="0"| df$workerid=="1"| df$workerid=="2"),]
-times = rbind(as.integer(unique(df$workerid)),unique(df$Answer.time_in_minutes))
-View(times)
+
+times = df %>%
+  select(workerid,Answer.time_in_minutes) %>%
+  unique()
+
+times = times %>% 
+  left_join(d,by = c("workerid"))
+
+ggplot(times, aes(x=age, y=Answer.time_in_minutes)) +
+  geom_point()+
+  geom_smooth(method="lm")
+
+ggplot(times, aes(x=Answer.time_in_minutes)) +
+  geom_histogram()
+
+times %>%
+  filter(Answer.time_in_minutes<10)
