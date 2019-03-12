@@ -1,6 +1,6 @@
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+setwd('../data')
 d = read.csv("example-subject_information.csv", header = TRUE)
 
 d <- d[c(8,1,2,3,4,5,6,7,9)]
@@ -51,12 +51,12 @@ times = df %>%
 times = times %>% 
   left_join(d,by = c("workerid"))
 
+times %>%
+  filter(Answer.time_in_minutes<5)
+
 ggplot(times, aes(x=age, y=Answer.time_in_minutes)) +
   geom_point()+
   geom_smooth(method="lm")
 
 ggplot(times, aes(x=Answer.time_in_minutes)) +
   geom_histogram()
-
-times %>%
-  filter(Answer.time_in_minutes<10)

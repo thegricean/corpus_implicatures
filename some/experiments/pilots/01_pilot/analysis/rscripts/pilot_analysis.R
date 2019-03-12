@@ -1,90 +1,108 @@
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+source("helpers.R")
+setwd('../data')
 
 df = read.csv("pilot.csv", header = TRUE)
-source("helpers.R")
+theme_set(theme_bw())
 
-# dataframes with workers excluded
-# d$asses = "No"
-dno = df %>% 
-  filter(workerid != "11", workerid != "13")
-# d$asses = "Confused"
-dco = dno %>% 
-  filter(workerid != "6")
+#EXCLUDE WORKERS --> TIME - less than 5 minutes
+df <-df[!(df$workerid %in% c("1","2","10","11","12","13")),]
 
-# ALL TRIALS
-ggplot(df,aes(x=rating))+
+#EXCLUDE WORKERS --> ASSESMENT - "No"
+#df <-df[!(df$workerid %in% c("4","11")),]
+
+#EXCLUDE WORKERS  --> VARIABILITY - 2 SD away from mean in one item
+#df <-df[!(df$workerid %in% c("")),]
+
+#EXCLUDE WORKERS  --> ATTENTION CHECK - more than 2 wrong
+#df <-df[!(df$workerid %in% c("")),]
+
+#EXCLUDE SENTENCES --> STRANGE
+#df <-df[!(df$tgrep_id %in% c("")),]
+
+#to determine first&second half of experiment                    
+df$trial <- df$slide_number_in_experiment - 7
+df$half <- ifelse(df$slide_number_in_experiment < 13,1,2)
+
+#ATTENTION CHECKS 
+attn = df %>% 
+  filter(str_detect(tgrep_id, "control"))
+
+ggplot(attn,aes(x=rating, fill=as.factor(workerid)))+
   geom_histogram()+
-  labs(title = "All Ratings")+
-  theme(plot.title = element_text(hjust =0.5))
+  facet_wrap(~tgrep_id) +
+  labs(title = "Ratings for attention checks")
 
-# workers excluded
-ggplot(dno,aes(x=rating))+
+ggsave(file="graphs/attention_check_ratings.pdf",width=8,height=3)
+
+avg = attn %>%
+  group_by(tgrep_id) %>%
+  summarize(Mean=mean(rating))
+
+avg
+  
+wrong = attn %>% 
+  mutate(WrongAnswer = (tgrep_id == "control1" & rating < 0.5 | tgrep_id == "control2" & rating > 0.5 | tgrep_id == "control3" & rating < 0.5 | tgrep_id == "control4" & rating > 0.5)) %>% 
+  group_by(workerid) %>% 
+  count(WrongAnswer) %>% 
+  filter(WrongAnswer == TRUE & n > 2)
+wrong
+
+#to see in which half the controls appeared
+ggplot(attn,aes(x=rating, fill=as.factor(half)))+
   geom_histogram()+
-  labs(title = "All Ratings")+
-  theme(plot.title = element_text(hjust =0.5))
+  facet_wrap(~tgrep_id) +
+  labs(title = "Ratings for attention checks")
 
-# PRACTICE TRIALS
+#####################################################################
+#practice trials
 practice = df %>% 
   filter(str_detect(tgrep_id, "example"))
+#target trials
+sentences = df %>% 
+  filter(str_detect(tgrep_id,"example",negate = TRUE))
+sentences = sentences %>% 
+  filter(str_detect(tgrep_id,"control",negate = TRUE))
+#####################################################################
 
-ggplot(practice, aes(x=rating,fill=as.factor(tgrep_id))) +
-  geom_density(alpha=.5)
+#ALL TRIALS - includes practice,attention check,target
+ggplot(df,aes(x=rating))+
+  geom_histogram()+
+  labs(title="All Ratings")
 
+#PRACTICE TRIALS
 ggplot(practice,aes(x=rating))+
   geom_histogram()+
   facet_wrap(~tgrep_id) +
-  labs(title = "Ratings for practice trials") +
-  theme(plot.title = element_text(hjust =0.5))
+  labs(title="Ratings for practice trials")
+  
+#how many judgments per item?
+table(df$tgrep_id)
+table(practice$tgrep_id, practice$workerid)
 
-# workers excluded
-p = dno %>% 
-  filter(str_detect(tgrep_id, "example"))
-
-ggplot(p,aes(x=rating))+
-  geom_histogram()+
-  facet_wrap(~tgrep_id)+
-  labs(title = "Ratings for practice trials")+
-  theme(plot.title = element_text(hjust =0.5))
-
-# TARGET TRIALS
-sentences = df %>% 
-  filter(str_detect(tgrep_id, "example", negate = TRUE))
-
+#TARGET TRIALS
 ggplot(sentences,aes(x=rating))+
   geom_histogram()+
-  labs(title = "Ratings for target trials")+
-  theme(plot.title = element_text(hjust =0.5))
+  labs(title="Ratings for target trials")
 
 ggplot(sentences, aes(x=rating,fill=tgrep_id)) +
   geom_density(alpha=.5)
 
-# workers excluded
-s = dno %>% 
-  filter(str_detect(tgrep_id, "example", negate = TRUE))
-
-ggplot(s,aes(x=rating))+
-  geom_histogram()+
-  labs(title = "Ratings for target trials - workers excluded")+
-  theme(plot.title = element_text(hjust =0.5))
-
-ggplot(s, aes(x=rating,fill=tgrep_id)) +
-  geom_density(alpha=.5)
-
-# for each item
+#for each item
 ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~tgrep_id)
 
-# for each participant
+#for each participant
 ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~workerid)
 
-# overall distribution of responses
+#overall distribution of responses
 agr = sentences %>%
   group_by(tgrep_id) %>%
-  summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating)) %>%
+  summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
   ungroup() %>%
   mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
 
@@ -97,64 +115,30 @@ ggplot(agr, aes(x=Mean)) +
   theme(plot.title = element_text(hjust =0.5))
 
 ggplot(agr, aes(x=OrderedTGrep,y=Mean)) +
-  geom_bar(stat="identity",color="black",fill="lightblue3") +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax),width=.25) +
-  geom_point(data=sentences, aes(y=rating),color="gray40",alpha=.2) +
+  geom_bar(stat="identity",fill = "lightblue3") +
+  geom_errorbar(aes(ymin = YMin, ymax = YMax),width=.25) +
+  geom_point(data=sentences, aes(y = rating,color = as.factor(workerid)),alpha=.2) + #,color="gray40",alpha=.2) +
   labs(title = "Mean rating by item")+
   theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
 
-ggsave(file = "graphs/mean_rating.pdf", width = 8, height = 3)
+#save graphs with different exclusions
+ggsave(file="../graphs/mean_rating.pdf",width=8,height=3)
+ggsave(file="../graphs/mean_rating_extime5.pdf",width=8, height=3)
+ggsave(file="../graphs/mean_rating_exvar.pdf",width=8, height=3)
 
-# overall distribution of responses - workers excluded
-ag = s %>%
-  group_by(tgrep_id) %>%
-  summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating)) %>%
-  ungroup() %>%
-  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
-s = s %>%
-  left_join(ag,by=c("tgrep_id"))
+#detect outliers that are x SD away from the mean
+variableturkers = sentences %>%
+  mutate(VarianceOutlier = (rating < Mean - 2*SD | rating > Mean + 2*SD)) %>%
+  group_by(workerid) %>%
+  count(VarianceOutlier) %>%
+  filter(VarianceOutlier == TRUE & n > 0)
 
-ggplot(ag, aes(x=OrderedTGrep,y=Mean)) +
-  geom_bar(stat="identity",color="black",fill="lightblue3") +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax),width=.25) +
-  geom_point(data=sentences, aes(y=rating),color="gray40",alpha=.2) +
-  labs(title = "Mean rating by item  - workers excluded")+
-  theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
+variableturkers
 
-# change in means with exclusion------------------------------FIX IT----------------
-agg = df %>%
-  filter(str_detect(tgrep_id, "example", negate = TRUE)) %>% 
-  mutate(exclude = ifelse(workerid==11 | workerid==13, T, F)) %>% 
-  group_by(tgrep_id) %>%
-  summarize(Mean_all=mean(rating),
-            CILow_all=ci.low(rating),
-            CIHigh_all=ci.high(rating),
-            Mean_exclude=mean(ifelse(!exclude,rating,NA),na.rm=TRUE),
-            CILow_exclude=ci.low(ifelse(!exclude,rating,NA)),
-            CIHigh_exclude=ci.high(ifelse(!exclude,rating,NA))) %>% 
-  ungroup() %>% 
-  gather(Mean_part, Mean, Mean_all, Mean_exclude)
-
-agg$CILow <- ifelse(agg$Mean_part == "Mean_all", agg$CILow_all, 0)
-agg$CIHigh <- ifelse(agg$Mean_part == "Mean_all", agg$CIHigh_all, 0)
-agg$CILow <- ifelse(agg$Mean_part == "Mean_exclude", agg$CILow_exclude, agg$CILow)
-agg$CIHigh <- ifelse(agg$Mean_part == "Mean_exclude", agg$CIHigh_exclude, agg$CIHigh)
-
-#agg$YMin = agg$Mean-agg$CILow
-#agg$YMax = agg$Mean+agg$CIHigh
-
-agg = agg %>%
-  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
-agg$Mean_part
-
-ggplot(agg, aes(x=tgrep_id,y=Mean, fill =Mean_part)) +
-  geom_bar(stat="identity",color="black",fill="lightblue3", position=dodge) +
-  geom_errorbar(aes(ymin=YMin, ymax=YMax),width=.25) +
-  geom_point(data=sentences, aes(y=rating),color="gray40",alpha=.2) +
-  labs(title = "Mean rating by item  - workers excluded")+
-  theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
-
-###########################################################################
+#look at outliers on selected items
+sentences[sentences$tgrep_id == "1214:19" & sentences$rating < .75,] # workerid 13
+sentences[sentences$tgrep_id == "4457:24" & sentences$rating > .50,] # workerid 13
+sentences[sentences$tgrep_id == "5480:20" & sentences$rating < .8,] # workerid 12, 5
 
 #strange sentences
 ggplot(sentences,aes(x=tgrep_id, fill=strange))+
@@ -163,7 +147,3 @@ ggplot(sentences,aes(x=tgrep_id, fill=strange))+
   labs(title = "\"This sentence sounds strange\"",
        x = "TGrep ID")+
   theme(plot.title = element_text(hjust =0.5))
-
-# how many judgments per item?
-table(df$tgrep_id)
-

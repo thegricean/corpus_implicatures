@@ -1,7 +1,7 @@
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("helpers.R")
-setwd('..')
+setwd('../data')
 
 df = read.csv("pilot.csv", header = TRUE)
 theme_set(theme_bw())
@@ -9,8 +9,8 @@ theme_set(theme_bw())
 #EXCLUDE WORKERID = 0,1,2 --> THEY WEREN'T PAID
 df <-df[!(df$workerid %in% c("0","1","2")),]
   
-#EXCLUDE WORKERS --> TIME
-df <-df[!(df$workerid %in% c("")),]
+#EXCLUDE WORKERS --> TIME  - under 5 minutes
+df <-df[!(df$workerid %in% c("3","11")),]
 
 #EXCLUDE WORKERS --> ASSESMENT
 df <-df[!(df$workerid %in% c("")),]
@@ -33,6 +33,8 @@ ggplot(attn,aes(x=rating, fill=as.factor(workerid)))+
   geom_histogram()+
   facet_wrap(~tgrep_id) +
   labs(title = "Ratings for attention checks")
+
+ggsave(file="graphs/attention_check_ratings.pdf",width=8, height=3)
 
 bad_turker1 = attn %>% 
   filter(tgrep_id == "control1" & rating < 0.5)
@@ -131,9 +133,9 @@ ggplot(agr, aes(x=OrderedTGrep,y=Mean)) +
   theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
 
 #save graphs with different exclusions
-ggsave(file="graphs/mean_rating.pdf",width=8,height=3)
-ggsave(file="graphs/mean_rating_excluded.pdf",width=8, height=3)
-ggsave(file="graphs/mean_rating_excluded_10.pdf",width=8, height=3)
+ggsave(file="../graphs/mean_rating.pdf",width=8,height=3)
+ggsave(file="../graphs/mean_rating_extime5.pdf",width=8, height=3)
+ggsave(file="../graphs/mean_rating_extime_10.pdf",width=8, height=3)
 
 #detect outliers that are x SD away from the mean
 variableturkers = sentences %>%

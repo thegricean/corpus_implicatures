@@ -2,7 +2,7 @@
 
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+setwd('../data')
 
 pilot <- read.csv("example-trials.csv")
 

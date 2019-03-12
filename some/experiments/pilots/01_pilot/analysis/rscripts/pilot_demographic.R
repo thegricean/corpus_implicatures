@@ -1,6 +1,6 @@
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
+setwd('../data')
 d = read.csv("pilot_demographic.csv", header = TRUE)
 
 # look at comments
@@ -46,3 +46,5 @@ ggplot(d, aes(x=education)) +
 # language
 ggplot(d, aes(x=language)) +
   geom_histogram(stat="count")
+
+
