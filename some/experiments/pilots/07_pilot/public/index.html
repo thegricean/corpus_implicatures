@@ -1,0 +1,319 @@
+<html>
+
+<head>
+    <title>Generics Experiment</title>
+
+    <!--JS-->
+
+    <!-- external general utilities -->
+    <script src="shared/js/jquery-1.11.1.min.js "></script>
+    <script src="shared/full-projects/jquery-ui/jquery-ui.min.js"></script>
+    <script src="shared/js/underscore-min.js"></script>
+    <!-- if you want to draw stuff: -->
+    <!-- <script src="_shared/js/raphael-min.js"></script> -->
+    <script src="shared/js/uniqueturker.js"></script>
+
+    <!-- cocolab experiment logic -->
+    <script src="shared/js/exp-V2.js"></script>
+    <script src="shared/js/stream-V2.js"></script>
+
+    <!-- cocolab general utilities -->
+    <script src="shared/js/mmturkey.js "></script>
+    <script src="shared/js/browserCheck.js"></script>
+    <script src="shared/js/utils.js"></script>
+    <!-- if you want to draw cute creatures (depends on raphael): -->
+    <!-- <script src="_shared/js/ecosystem.js"></script> -->
+
+    <!-- experiment specific helper functions -->
+    <!-- <script src="js/local-utils.js"></script> -->
+
+    <!--CSS-->
+    <link href="shared/full-projects/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+    <link href="shared/css/cocolab-style.css" rel="stylesheet" type="text/css"/>
+    <link href="css/local-style.css" rel="stylesheet" type="text/css"/>
+
+    <!-- experiment file -->
+    <script src="js/prevalence.js"></script>
+
+    <!-- stimulus file -->
+    <script src="js/stimuli.js"></script>
+</head>
+
+<body onload="init()">
+  <noscript>This task requires JavaScript.</noscript>
+
+  <div class="slide" id="i0">
+  	<img src="alps_lab.png" alt="Alps Lab"  style="width:400;height:192px;">
+
+    <p id="instruct-text" align="left">You will read short conversations. These are transcriptions of real conversations that real people had over the phone. The last sentence of each conversation will be marked in red and you will see a blue sentence below the conversation. <strong>Your task is to answer whether the blue sentence is true and rate what the person who said the red sentence knows.</strong><br>The HIT will take approximately 10-15 minutes. Let's start with five examples!</p>
+    <button id="start_button" type="button">Start Experiment</button>
+
+     <p id="instruct-text" align="left"><i><small><small><strong><br><br><br>LEGAL INFORMATION</strong>:<br><br>We invite you to participate in a research study on language production and comprehension.<br>Your experimenter will ask you to do a linguistic task such as reading sentences or words, naming pictures or describing scenes, making up sentences of your own, or participating in a simple language game.<br><br>You will be paid for your participation at the posted rate.<br><br>There are no risks or benefits of any kind involved in this study.<br><br>If you have read this form and have decided to participate in this experiment, please understand your participation is voluntary and you have the right to withdraw your consent or discontinue participation at any time without penalty or loss of benefits to which you are otherwise entitled. You have the right to refuse to do particular tasks. Your individual privacy will be maintained in all published and written data resulting from the study.<br>You may print this form for your records.<br><br>CONTACT INFORMATION:<br>If you have any questions, concerns or complaints about this research study, its procedures, risks and benefits, you should contact the Protocol Director Meghan Sumner at <br>(650)-725-9336<br><br>If you are not satisfied with how this study is being conducted, or if you have any concerns, complaints, or general questions about the research or your rights as a participant, please contact the Stanford Institutional Review Board (IRB) to speak to someone independent of the research team at (650)-723-2480 or toll free at 1-866-680-2906. You can also write to the Stanford IRB, Stanford University, 3000 El Camino Real, Five Palo Alto Square, 4th Floor, Palo Alto, CA 94306 USA.<br><br>If you agree to participate, please proceed to the study tasks.<br><br></small></small></i></p>
+</div>
+
+ <!-- EXAMPLE 1 -->
+<div class="slide" id="example1">
+	<h3>Example 1</h3>
+    <p><div align="left">
+    <b> Speaker #1:</b> How is school going?
+  	<br><b> Speaker #2:</b> <font color=#E7532B>Mary hasn't been coming to class this week.</font> </div></p>
+	<table class = "table1" id="sentenceGenerator"> </table> 
+	<!-- first question-->
+	<div id = "beforeclicked">
+		<div id="intruction1" class="instruction"><i>The blue sentence is ...</i></div>
+	      <label><input type="radio"  name="truth" value="false"/><font color=#424242>false</font></label>
+	      <label><input type="radio"  name="truth" value="unclear"/><font color=#424242>not sure</font></label>
+	      <label><input type="radio"  name="truth" value="true"/><font color=#424242>true</font></label>
+	      <br><br>
+	      <button onclick="_s.checkbox()">Continue</button></div>
+	<div id= "iftrue">
+		<div id="intruction11" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<div id= "iffalse">
+		<div id="intruction11" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is false?</strong> Please adjust the slider.</i></div></div>
+	<div id= "ifunclear">
+		<div id="intruction11" class="instruction"><i>Does the speaker who produced the red sentence know <strong>whether the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<!-- second question-->
+	<div id= "ifclicked">
+  		<table id="slider_table" class="slider_table">
+		<tr>
+			<td><font color=#424242>speaker doesn't know</font></td>
+			<td colspan="2"><div id="single_slider" class="slider"></div></td>
+			<td><font color=#424242>speaker knows</font></td>
+		</tr>
+		</table>
+  		<!-- <div id="intruction12" class="instruction"><strong><i>We are interested in what the speaker knows regardless of whether the blue sentence is true or not. Do you think Speaker #2 knows whether or not Mary went to school today?</i></strong> </div> -->
+		<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div></div>
+</div>
+
+<!-- EXAMPLE 2 -->
+<div class="slide" id="example2">
+    <h3>Example 2</h3>
+    <p><div align="left">
+     <b> Speaker #1:</b>  Did you watch the Super Bowl?
+	<br><b> Speaker #2:</b> <font color=#E7532B> Um, is that baseball? </font></div></p>
+	<table class = "table1" id="sentenceGenerator2"> </table> 
+	<!-- first question-->
+	<div id = "beforeclicked2">
+		<div id="intruction2" class="instruction"><i>The blue sentence is ...</i></div>
+	      <label><input type="radio"  name="truth" value="false"/><font color=#424242>false</font></label>
+	      <label><input type="radio"  name="truth" value="unclear"/><font color=#424242>not sure</font></label>
+	      <label><input type="radio"  name="truth" value="true"/><font color=#424242>true</font></label>
+	      <br><br>
+	      <button onclick="_s.checkbox()">Continue</button></div>
+	<div id= "iftrue2">
+		 <div id="intruction22" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<div id= "iffalse2">
+		<div id="intruction22" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is false?</strong> Please adjust the slider.</i></div></div>
+	<div id= "ifunclear2">
+		   <div id="intruction22" class="instruction"><i>Does the speaker who produced the red sentence know <strong>whether the blue sentence is true?</strong>Please adjust the slider.</i></div></div>
+	<!-- second question-->
+	<div id = "ifclicked2">
+  		<table id="slider_table2" class="slider_table">
+		<tr>
+		<td><font color=#424242>speaker doesn't know</font></td>
+		<td colspan="2"><div id="single_slider2" class="slider"></div></td>
+		<td><font color=#424242>speaker knows</font></td>
+		</tr>
+		</table>
+  		<!-- <div id="intruction23" class="instruction"><strong><i>We are interested in what the speaker knows regardless of whether the blue sentence is true or not. Do you think Speaker #2 knows whether or not Patriots won the Super Bowl?</i></strong> </div> -->
+		<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div></div>
+</div>
+
+<!-- EXAMPLE 3 -->
+<div class="slide" id="example3">
+    <h3>Example 3</h3>
+    <p><div align="left">
+     <b> Speaker #1:</b>  Have you tried the new restaurant on Main and 4th?
+	<br><b> Speaker #2:</b> <font color=#E7532B> Ugh, I went last week and at the table next to us there was this group of people who were claiming that California is on the East Coast.</font></div></p>
+	<table class = "table1" id="sentenceGenerator3"> </table> 
+	<!-- first question-->
+	<div id = "beforeclicked3">
+		<div id="intruction3" class="instruction"><i>The blue sentence is ...</i></div>
+	      <label><input type="radio"  name="truth" value="false"/><font color=#424242>false</font></label>
+	      <label><input type="radio"  name="truth" value="unclear"/><font color=#424242>not sure</font></label>
+	      <label><input type="radio"  name="truth" value="true"/><font color=#424242>true</font></label>
+	      <br><br>
+	      <button onclick="_s.checkbox()">Continue</button></div>
+	<div id= "iftrue3">
+		 <div id="intruction32" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<div id= "iffalse3">
+		<div id="intruction32" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is false?</strong> Please adjust the slider.</i></div></div>
+	<div id= "ifunclear3">
+		   <div id="intruction32" class="instruction"><i>Does the speaker who produced the red sentence know <strong>whether the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<!-- second question-->
+	<div id = "ifclicked3">
+  		<table id="slider_table3" class="slider_table">
+		<tr>
+		<td><font color=#424242>speaker doesn't know</font></td>
+		<td colspan="2"><div id="single_slider3" class="slider"></div></td>
+		<td><font color=#424242>speaker knows</font></td>
+		</tr>
+		</table>
+  		<!-- <div id="intruction33" class="instruction"><strong><i>We are interested in what the speaker knows regardless of whether the blue sentence is true or not. Do you think Speaker #2 knows whether or not California is on the East Coast?</i></strong> </div> -->
+		<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div></div>
+</div>     
+      
+<!-- EXAMPLE 4 -->
+<div class="slide" id="example4">
+    <h3>Example 4</h3>
+    <p><div align="left">
+     <b> Speaker #1:</b>  What did you do in the past few hours?
+	<br><b> Speaker #2:</b> <font color=#E7532B> I did some of my homework.</font></div></p>
+	<table class = "table1" id="sentenceGenerator4"> </table> 
+	<!-- first question-->
+	<div id = "beforeclicked4">
+		<div id="intruction4" class="instruction"><i>The blue sentence is ...</i></div>
+	      <label><input type="radio"  name="truth" value="false"/><font color=#424242>false</font></label>
+	      <label><input type="radio"  name="truth" value="unclear"/><font color=#424242>not sure</font></label>
+	      <label><input type="radio"  name="truth" value="true"/><font color=#424242>true</font></label>
+	      <br><br>
+	      <button onclick="_s.checkbox()">Continue</button></div>
+	<div id= "iftrue4">
+		 <div id="intruction42" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<div id= "iffalse4">
+		<div id="intruction42" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is false?</strong> Please adjust the slider.</i></div></div>
+	<div id= "ifunclear4">
+		   <div id="intruction42" class="instruction"><i>Does the speaker who produced the red sentence know <strong>whether the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<!-- second question-->
+	<div id = "ifclicked4">
+  		<table id="slider_table4" class="slider_table">
+		<tr>
+		<td><font color=#424242>speaker doesn't know</font></td>
+		<td colspan="2"><div id="single_slider4" class="slider"></div></td>
+		<td><font color=#424242>speaker knows</font></td>
+		</tr>
+		</table>
+  		<!-- <div id="intruction43" class="instruction"><strong><i>We are interested in what the speaker knows regardless of whether the blue sentence is true or not. Do you think Speaker #2 knows whether or not they did all of their homework?</i></strong> </div> -->
+		<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div></div>
+</div>  
+  
+<!-- EXAMPLE 5 -->
+<div class="slide" id="example5">
+    <h3>Example 5</h3>
+    <p><div align="left">
+     <b> Speaker #1:</b>  What's this smell?
+	<br><b> Speaker #2:</b> <font color=#E7532B> I'm not sure, I think some of the things in the fridge went bad.</font></div></p>
+	<table class = "table1" id="sentenceGenerator5"> </table> 
+	<!-- first question-->
+	<div id = "beforeclicked5">
+		<div id="intruction5" class="instruction"><i>The blue sentence is ...</i></div>
+	      <label><input type="radio"  name="truth" value="false"/><font color=#424242>false</font></label>
+	      <label><input type="radio"  name="truth" value="unclear"/><font color=#424242>not sure</font></label>
+	      <label><input type="radio"  name="truth" value="true"/><font color=#424242>true</font></label>
+	      <br><br>
+	      <button onclick="_s.checkbox()">Continue</button></div>
+	<div id= "iftrue5">
+		 <div id="intruction52" class="instruction"><i>Does the speaker who produced the red sentence know <strong>that the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<div id= "iffalse5">
+		<div id="intruction52" class="instruction"><i>Does the speaker who produced the red sentence red know <strong>that the blue sentence is false?</strong> Please adjust the slider.</i></div></div>
+	<div id= "ifunclear5">
+		   <div id="intruction52" class="instruction"><i>Does the speaker who produced the red sentence know <strong>whether the blue sentence is true?</strong> Please adjust the slider.</i></div></div>
+	<!-- second question-->
+	<div id = "ifclicked5">
+  		<table id="slider_table5" class="slider_table">
+		<tr>
+		<td><font color=#424242>speaker doesn't know</font></td>
+		<td colspan="2"><div id="single_slider5" class="slider"></div></td>
+		<td><font color=#424242>speaker knows</font></td>
+		</tr>
+		</table>
+  		<!-- <div id="intruction53" class="instruction"><strong><i>We are interested in what the speaker knows regardless of whether the blue sentence is true or not. Do you think Speaker #2 knows whether or not all of the things in the fridge went bad?</i></strong> </div> -->
+		<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div></div>
+</div>  
+ 
+<!-- EXPERIMENT -->
+<div class="slide" id="startExp">
+    <p id="instruct-text" align="left">Great! Now we can start the real experiment. You will now read 24 conversations. Please read the whole conversation before you set the slider. For most of the sentences you'll compare, the difference is that the word "some" has been replaced by "all". <strong> Your task is to rate what the person who said the red sentence knows.</strong> Sometimes, the sentence with "all" will sound strange. In this case, set the slider to the best of your ability, but also click the checkbox next to "The blue sentence sounds strange". <br><br><b>To make sure you are paying attention, we have included some cases for which we know the right answer. If you read the conversations carefully, you will definitely get those right.</b>
+    </p>
+    <table id="instructionGen"> </table> 
+</div>
+
+<div class="slide" id="generateEntities">
+  <p class="case" style="text-align: left;"></p>
+  <p></p>
+  	<table class="table1" id="tableGenerator"> </table>
+	<div id="intruction6" class="instruction"><i>Does the person who produced the red sentence know whether the blue sentence is true? Please adjust the slider.</i></div>
+	<table id="slider_table6" class="slider_table">
+	<tr>
+		<td><font color=#424242>speaker doesn't know</font></td>
+		<td colspan="2"><div id="single_slider6" class="slider"></div></td>
+		<td><font color=#424242>speaker knows</font></td>
+	</tr>
+	</table>
+	<font color=#424242> The blue sentence sounds strange: <input type="checkbox" id="myCheck"></font>
+	<br>
+	<br>
+	<div align=center><button class=continueButton onclick=_s.button()>Continue</button></div>
+</div>
+
+<!-- SUBJECT INFORMATION -->
+<div class="slide"  id="subj_info">
+    <div class="long_form">
+      <div class="subj_info_title">Additional information</div>
+      <p class="info">Answering these questions is optional, but will help us understand your answers.</p>
+      <p>Did you read the instructions and do you think you did the HIT correctly?</p>
+      <label><input type="radio"  name="assess" value="No"/>No</label>
+      <label><input type="radio"  name="assess" value="Yes"/>Yes</label>
+      <label><input type="radio"  name="assess" value="Confused"/>I was confused</label>
+
+      <p>Gender:
+        <select id="gender">
+          <label><option value=""/></label>
+          <label><option value="Male"/>Male</label>
+          <label><option value="Female"/>Female</label>
+          <label><option value="Other"/>Other</label>
+        </select>
+      </p>
+
+      <p>Age: <input type="text" id="age"/></p>
+
+      <p>Level Of Education:
+        <select id="education">
+          <label><option value="-1"/></label>
+          <label><option value="0"/>Some High School</label>
+          <label><option value="1"/>Graduated High School</label>
+          <label><option value="2"/>Some College</label>
+          <label><option value="3"/>Graduated College</label>
+          <label><option value="4"/>Hold a higher degree</label>
+        </select>
+      </p>
+
+      <p>Native Language: <input type="text" id="language"/></p>
+      <label>(the language(s) spoken at home when you were a child)</label>
+      
+      <p>Do you think the payment was fair?</p>
+      <select id="fairprice">
+        <label><option value="-1"></option></label>
+        <label><option value="0">The payment was too little</option></label>
+        <label><option value="1" >The payment was fair</option></label>
+      </select>
+      
+      <p>Did you enjoy the hit?</p>
+      <select id="enjoyment">
+        <label><option value="-1"></option></label>
+        <label><option value="0">Worse than the Average HIT</option></label>
+        <label><option value="1" >An Average HIT</option></label>
+        <label><option value="2">Better than average HIT</option></label>
+      </select>
+    
+      <p>We would be interested in any comments you have about this experiment. Please type them here:</p>
+      <textarea id="comments" rows="3" cols="50"></textarea>
+      <br/>
+      <button onclick="_s.submit()">Submit</button>
+    </div>
+  </div>
+
+  <div id="thanks" class="slide js" >
+    <p  class="big">Thanks for your Time!</p>
+  </div>
+
+  <div class="progress">
+    <span>Progress:</span>
+    <div class="bar-wrapper">
+      <div class="bar" width="0%">
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
