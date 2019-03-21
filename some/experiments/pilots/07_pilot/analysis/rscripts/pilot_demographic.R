@@ -56,3 +56,4 @@ ggplot(times, aes(x=age, y=Answer.time_in_minutes)) +
 
 times %>%
   filter(Answer.time_in_minutes<7)
+

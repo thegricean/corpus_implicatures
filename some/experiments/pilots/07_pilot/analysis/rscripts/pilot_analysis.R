@@ -15,7 +15,7 @@ df <-df[!(df$workerid %in% c("3", "8", "13")),]
 df <-df[!(df$workerid %in% c("6")),]
 
 #EXCLUDE WORKERS  --> VARIABILITY - 2 SD away from mean in at least one item
-df <-df[!(df$workerid %in% c("4")),]
+df <-df[!(df$workerid %in% c("1","2","4")),]
 
 #EXCLUDE SENTENCES --> STRANGE
 #df <-df[!(df$tgrep_id %in% c()),]
@@ -36,7 +36,7 @@ ggplot(attn,aes(x=rating, fill=as.factor(workerid)))+
 ggsave(file="../graphs/attention_check_ratings.pdf",width=8,height=3)
 
 wrong_control = attn %>% 
-  mutate(WrongAnswer = (tgrep_id == "control1" & rating < 0.5 | tgrep_id == "control2" & rating > 0.5 | tgrep_id == "control3" & rating < 0.5 | tgrep_id == "control4" & rating > 0.5)) #%>% 
+  mutate(WrongAnswer = (tgrep_id == "control1" & rating < 0.5 | tgrep_id == "control2" & rating > 0.5 | tgrep_id == "control3" & rating < 0.5 | tgrep_id == "control4" & rating > 0.5)) %>% 
   group_by(workerid) %>% 
   count(WrongAnswer) %>% 
   filter(WrongAnswer == TRUE)
@@ -89,8 +89,15 @@ ggplot(wrong_practice,aes(x=strange, fill=as.factor(WrongAnswer)))+
   facet_wrap(~tgrep_id) +
   labs(title="Ratings for practice trials") 
 
+checkbox = df %>% 
+  filter(str_detect(tgrep_id, "examplecheckbox"))
+
+ggplot(checkbox, aes(x=strange))+
+  geom_bar()+
+  facet_wrap(~tgrep_id)
+
 #wrong answers to practice trials and controls 
-wrong = rbind(wrong_practice,wrong_control)
+wrong = dplyr::bind_rows(wrong_practice,wrong_control)
 table(wrong$workerid,wrong$tgrep_id,wrong$WrongAnswer)
 
 #TARGET TRIALS
@@ -111,10 +118,19 @@ ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~workerid)
 
+# collect information on Turkers' overall response distribution variance
+variances = sentences %>%
+  group_by(workerid)  %>%
+  summarize(Var = var(rating)) %>%
+  mutate(SmallVariance = Var < mean(Var) - 2*sd(Var)) #%>%
+  filter(SmallVariance == TRUE)
+
+summary(variances)
+
 #overall distribution of responses
 agr = sentences %>%
   group_by(tgrep_id) %>%
-  summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
+  summarize(Median=median(rating),Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
   ungroup() %>%
   mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
 
@@ -130,6 +146,7 @@ ggplot(agr, aes(x=OrderedTGrep,y=Mean)) +
   geom_bar(stat="identity",fill = "lightblue3") +
   geom_errorbar(aes(ymin = YMin, ymax = YMax),width=.25) +
   geom_point(data=sentences, aes(y = rating,color = as.factor(workerid)),alpha=.2) + #,color="gray40",alpha=.2) +
+  geom_point(aes(y=Median),color="orange",size=4) +
   labs(title = "Mean rating by item")+
   theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
 
@@ -140,7 +157,7 @@ ggsave(file="../graphs/mean_rating_exvar2.pdf",width=8, height=3)
 
 #detect outliers that are x SD away from the mean
 variableturkers = sentences %>%
-  mutate(VarianceOutlier = (rating < Mean - 2*SD | rating > Mean + 2*SD)) %>%
+  mutate(VarianceOutlier = (rating < Median - 2*SD | rating > Median + 2*SD)) %>%
   group_by(workerid) %>%
   count(VarianceOutlier) %>%
   filter(VarianceOutlier == TRUE & n > 0)
@@ -148,7 +165,7 @@ variableturkers = sentences %>%
 variableturkers
 
 #look at outliers on selected items
-sentences[sentences$tgrep_id == "4008:21" & sentences$rating > .95,] # workerid 2,4,11
+sentences[sentences$tgrep_id == "3878:16" & sentences$rating < .20,] # workerid 2,4,11
 sentences[sentences$tgrep_id == "2454:46" & sentences$rating < .5,] # workerid 13
 sentences[sentences$tgrep_id == "4457:24" & sentences$rating > .8,] # workerid 
 

@@ -2,15 +2,29 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("helpers.R")
 setwd('../data')
-
 theme_set(theme_bw())
-df = read.csv("results_merged.csv", header = TRUE)
+df = read.csv("results_merged.csv", header = TRUE) 
+# 98 people total
 
-#EXCLUDE WORKERS --> TIME - less than 7 minutes
-df <-df[!(df$workerid %in% c()),]
+times = df %>%
+  select(workerid,Answer.time_in_minutes,speaker_cond) %>%
+  unique()
 
-#EXCLUDE WORKERS  --> VARIABILITY - 2 SD away from mean in more than 2 items
-df <-df[!(df$workerid %in% c("60","70","75")),]
+ggplot(times, aes(x=Answer.time_in_minutes)) +
+  geom_histogram()
+
+fast_workers = times %>%
+  filter(Answer.time_in_minutes<6) %>%
+  select(workerid)
+
+#EXCLUDE WORKERS --> TIME - less than 6 minutes --> 24 people
+df <-df[!(df$workerid %in% fast_workers$workerid),]
+
+#EXCLUDE WORKERS  --> VARIANCE - 2 SD less than mean variance
+df <-df[!(df$workerid %in% variableturkers$workerid),]
+
+#EXCLUDE WORKERS  --> VARIABILITY(MEDIAN) - 2 SD away from median in more than 2 items
+df <-df[!(df$workerid %in% variableturkers$workerid),]
 
 #EXCLUDE SENTENCES --> STRANGE - 
 #df <-df[!(df$tgrep_id %in% c()),]
@@ -40,10 +54,19 @@ ggplot(sentences, aes(x=rating)) +
   geom_histogram() +
   facet_wrap(~tgrep_id)
 
+# collect information on Turkers' overall response distribution variance
+variances = sentences %>%
+  group_by(workerid)  %>%
+  summarize(Var = var(rating)) %>%
+  mutate(SmallVariance = Var < mean(Var) - 2*sd(Var)) #%>%
+  filter(SmallVariance == TRUE)
+
+summary(variances)
+
 #overall distribution of responses
 agr = sentences %>%
   group_by(tgrep_id) %>%
-  summarize(Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
+  summarize(Median=median(rating),Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
   ungroup() %>%
   mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
 
@@ -59,22 +82,22 @@ ggplot(agr, aes(x=OrderedTGrep,y=Mean)) +
   geom_bar(stat="identity",fill = "lightblue3") +
   geom_errorbar(aes(ymin = YMin, ymax = YMax),width=.25) +
   # geom_point(data=sentences, aes(y = rating,color = as.factor(workerid)),alpha=.2) + 
+  geom_point(aes(y=Median),color="orange",size=4) +
   labs(title = "Mean rating by item") +
   theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
 
 #save graphs with different exclusions
 ggsave(file="../graphs/mean_rating.pdf",width=8,height=3)
-ggsave(file="../graphs/mean_rating_extime7.pdf",width=8, height=3)
+ggsave(file="../graphs/mean_rating_extime6.pdf",width=8, height=3)
 ggsave(file="../graphs/mean_rating_exvar2.pdf",width=8, height=3)
 
-#detect outliers that are x SD away from the mean
+#detect outliers that are x SD away from the median
 variableturkers = sentences %>%
-  mutate(VarianceOutlier = (rating < Mean - 2*SD | rating > Mean + 2*SD)) %>%
+  mutate(VarianceOutlier = (rating < Median - 2*SD | rating > Median + 2*SD)) %>%
   group_by(workerid) %>%
   count(VarianceOutlier) %>%
-  filter(VarianceOutlier == TRUE & n > 2)
-
-variableturkers
+  filter(VarianceOutlier == TRUE & n > 1) #%>%
+  select(workerid)
 
 #strange sentences
 sentences$strange = str_replace(sentences$strange,"true","True")
