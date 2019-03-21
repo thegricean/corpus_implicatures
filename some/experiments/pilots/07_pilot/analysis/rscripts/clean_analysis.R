@@ -16,6 +16,7 @@ ggplot(times, aes(x=Answer.time_in_minutes)) +
 fast_workers = times %>%
   filter(Answer.time_in_minutes<6) %>%
   select(workerid)
+fast_workers
 
 #EXCLUDE WORKERS --> TIME - less than 6 minutes
 df <-df[!(df$workerid %in% fast_workers$workerid),]
@@ -35,12 +36,11 @@ ggplot(attn,aes(x=rating, fill=as.factor(workerid)))+
 ggsave(file="../graphs/attention_check_ratings.pdf",width=8,height=3)
 
 wrong_control = attn %>% 
-  mutate(WrongAnswer = (tgrep_id == "control1" & rating < 0.5 | tgrep_id == "control2" & rating > 0.5 | tgrep_id == "control3" & rating < 0.5 | tgrep_id == "control4" & rating > 0.5)) #%>% 
-group_by(workerid) %>% 
+  mutate(WrongAnswer = (tgrep_id == "control1" & rating < 0.5 | tgrep_id == "control2" & rating > 0.5 | tgrep_id == "control3" & rating < 0.5 | tgrep_id == "control4" & rating > 0.5)) %>% 
+  group_by(workerid) %>% 
   count(WrongAnswer) %>% 
-  filter(WrongAnswer == TRUE $ n>2) %>%
+  filter(WrongAnswer == TRUE & n>2) %>%
   select(workerid)
-
 wrong_control
 
 #to see in which half the controls appeared
@@ -50,13 +50,9 @@ ggplot(attn,aes(x=rating, fill=as.factor(half)))+
   labs(title = "Ratings for attention checks")
 
 #EXCLUDE WORKERS  --> ATTENTION CHECK - wrong answer to more than 2 items
-df <-df[!(df$workerid %in% wrong_control),]
+df <-df[!(df$workerid %in% wrong_control$workerid),]
 
 #####################################################################
-#practice trials
-practice = df %>% 
-  filter(str_detect(tgrep_id, "example")) %>%
-  filter(str_detect(tgrep_id, "examplecheckbox", negate = TRUE))
 #target trials
 sentences = df %>% 
   filter(str_detect(tgrep_id,"example",negate = TRUE)) %>% 
@@ -68,14 +64,19 @@ sentences = df %>%
 variances = sentences %>%
   group_by(workerid)  %>%
   summarize(Var = var(rating)) %>%
-  mutate(SmallVariance = Var < mean(Var) - 2*sd(Var)) %>%
+  mutate(SmallVariance = Var < mean(Var) - 2*sd(Var)) #%>%
   filter(SmallVariance == TRUE) %>%
   select(workerid)
+variances
 
 summary(variances)
 
 #EXCLUDE WORKERS  --> VARIANCE - variance smaller than mean(variance)-2sd
-df <-df[!(df$workerid %in% variances),]
+df <-df[!(df$workerid %in% variances$workerid),]
+
+sentences = df %>% 
+  filter(str_detect(tgrep_id,"example",negate = TRUE)) %>% 
+  filter(str_detect(tgrep_id,"control",negate = TRUE))
 
 #MEDIAN VARIABILITY
 #overall distribution of responses
@@ -106,23 +107,26 @@ ggsave(file="../graphs/mean_rating.pdf",width=8,height=3)
 ggsave(file="../graphs/mean_rating_extime7.pdf",width=8, height=3)
 ggsave(file="../graphs/mean_rating_exvar2.pdf",width=8, height=3)
 
-#detect outliers that are x SD away from the mean
+#detect outliers that are x SD away from the median
 variableturkers = sentences %>%
-  mutate(VarianceOutlier = (rating < Mean - 2*SD | rating > Mean + 2*SD)) %>%
+  mutate(VarianceOutlier = (rating < Median - 2*SD | rating > Median + 2*SD)) %>%
   group_by(workerid) %>%
   count(VarianceOutlier) %>%
   filter(VarianceOutlier == TRUE & n > 2) %>%
   select(workerid)
-
 variableturkers
 
 #look at outliers on selected items
-sentences[sentences$tgrep_id == "4008:21" & sentences$rating > .95,] # workerid
-sentences[sentences$tgrep_id == "2454:46" & sentences$rating < .5,] # workerid
-sentences[sentences$tgrep_id == "4457:24" & sentences$rating > .8,] # workerid
+sentences[sentences$tgrep_id == "3878:16" & sentences$rating < .5,]$workerid # 
+sentences[sentences$tgrep_id == "2454:46" & sentences$rating < .5,]$workerid #
+sentences[sentences$tgrep_id == "4457:24" & sentences$rating > .8,]$workerid #
 
 #EXCLUDE WORKERS  --> VARIABILITY - 2 SD away from median in more than two items
-df <-df[!(df$workerid %in% c(variableturkers)),]
+df <-df[!(df$workerid %in% variableturkers$workerid),]
+
+sentences = df %>% 
+  filter(str_detect(tgrep_id,"example",negate = TRUE)) %>% 
+  filter(str_detect(tgrep_id,"control",negate = TRUE))
 
 #ALL TRIALS - includes practice,attention check,target
 ggplot(df,aes(x=rating))+
@@ -130,6 +134,10 @@ ggplot(df,aes(x=rating))+
   labs(title="All Ratings")
 
 #PRACTICE TRIALS
+practice = df %>% 
+  filter(str_detect(tgrep_id, "example")) %>%
+  filter(str_detect(tgrep_id, "examplecheckbox", negate = TRUE))
+
 ggplot(practice,aes(x=rating, fill=as.factor(workerid)))+
   geom_histogram()+
   facet_wrap(~tgrep_id) +
@@ -144,7 +152,6 @@ wrong_practice = practice %>%
   group_by(tgrep_id) %>% 
   count(WrongAnswer) %>% 
   filter(WrongAnswer == TRUE)
-  
 wrong_practice
 
 #wrong answers and true/false/not_sure
@@ -180,5 +187,4 @@ ggplot(sentences,aes(x=tgrep_id, fill=strange))+
   geom_bar(position = "fill")+
   theme(axis.text.x=element_text(angle=45,hjust=1))+
   labs(title = "\"This sentence sounds strange\"",
-       x = "TGrep ID")+
-  
+       x = "TGrep ID")

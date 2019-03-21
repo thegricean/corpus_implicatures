@@ -563,17 +563,14 @@ slides.example5 = slide({
 
 /// init ///
 function init() {
-
-  repeatWorker = false;
-  (function(){
-  var ut_id = "89ba002d417d4582045d69e64851d820";  // remember to replace this!
-  if (UTWorkerLimitReached(ut_id)) {
-    $('.slide').empty();
-    repeatWorker = true;
-    alert("You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT' to avoid any impact on your approval rating.");
-  }
-})();
- 
+  
+  $(document).ready(function(){
+   var ut_id = "7b9297ad6b2871d5fbcd44fca77f10d";
+   if (UTWorkerLimitReached(ut_id)) {
+     $(".slide").hide();
+     $("body").html("You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT' to avoid any impact on your approval rating.");
+}});
+  
   exp.n_entities = 1;
   exp.names = [];
   exp.all_names = []; 
