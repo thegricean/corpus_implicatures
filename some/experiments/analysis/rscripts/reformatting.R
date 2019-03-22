@@ -1,18 +1,26 @@
-# Use example-trials.csv to create new csv with two seperate columns for "rating" and "strange sentence
+# Create new csv with two seperate columns for "rating" and "strange sentence
 
 library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('../data')
 
-trials <- read.csv("example-trials.csv")
+df <- read.csv("results_merged.csv")
 
-trials <- separate(pilot,response,into=c("rating","strange"),sep=",")
-trials$rating <- as.character(gsub("\\''",""trials$rating))
-trials$rating <- as.character(gsub("\\[","",trials$rating))
-trials$strange <- as.character(gsub("\\]","",trials$strange))
+df <- separate(df,response,into=c("rating","strange"),sep=",")
+df$rating <- as.character(gsub("\\''","",df$rating))
+df$rating <- as.character(gsub("\\[","",df$rating))
 
-trials$Answer.condition <- NULL
+df$strange <- as.character(gsub("True","true",df$strange))
+df$strange <- as.character(gsub("False","false",df$strange))
+df$strange <- as.character(gsub("Not_sure","not_sure",df$strange))
+df$strange <- as.character(gsub("Unclear","not_sure",df$strange))
 
-write.csv(trials, file = "trials.csv")
+df$strange <- as.character(gsub("\\]","",df$strange))
+df$strange <- as.character(gsub("\\'","",df$strange))
 
-View(trials)
+
+df$Answer.condition <- NULL
+
+write.csv(df, file = "results_formatted.csv")
+
+View(df)

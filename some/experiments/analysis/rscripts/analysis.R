@@ -3,7 +3,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("helpers.R")
 setwd('../data')
 theme_set(theme_bw())
-df = read.csv("trials.csv", header = TRUE)
+df = read.csv("results_formatted.csv", header = TRUE)
 
 #TIME
 times = df %>%
@@ -28,7 +28,7 @@ df$half <- ifelse(df$slide_number_in_experiment < 13,1,2)
 attn = df %>% 
   filter(str_detect(tgrep_id, "control"))
 
-ggplot(attn,aes(x=rating, fill=as.factor(workerid)))+
+ggplot(attn,aes(x=rating)) +
   geom_histogram()+
   facet_wrap(~tgrep_id) +
   labs(title = "Ratings for attention checks")
