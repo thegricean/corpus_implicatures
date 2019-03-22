@@ -1,13 +1,13 @@
-##ISSUES: 
+##ISSUES:     
 each experiment should have 25 unique turkers
 
-experiment 15 --> 24 unique turkers  
-experiment 17 --> 24 unique turkers  
-experiment 27 --> 41 unique turkers???   
-experiment 28 --> 23 unique turkers  
+- experiment 15 --> 24 unique turkers  
+- experiment 17 --> 24 unique turkers  
+- experiment 27 --> 41 unique turkers???   
+- experiment 28 --> 23 unique turkers  
 
-TOTAL   
-725 participants (29 experiments x 25 participants)  
+**TOTAL**   
+We should have 725 participants (29 experiments x 25 participants)  
 We have 737 participants (x unique)
 
 
@@ -18,8 +18,7 @@ We can test more people for experiment 14,17,28 and randomly remove 16 participa
 
 
 
-#ANALYSIS
-
+##ANALYSIS   
 - 122 workers did the experiment in less than 6 minutes  
 - 82 people got more than 2 controls wrong (30 of them are already excluded with time exclusion)  
 - Nobody got excluded with variance exclusion  
