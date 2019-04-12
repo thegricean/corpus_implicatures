@@ -5,18 +5,58 @@ setwd('../data')
 theme_set(theme_bw())
 df = read.csv("results_formatted.csv", header = TRUE)
 
+#LANGUAGE
+s = read.csv("subject-info_merged.csv", header = TRUE)
+
+lang = s %>%
+  select(workerid, language) %>%
+  unique()
+
+#  What about "x and English", "canada", "texas" -- FIX
+non_native = lang %>%
+  filter(!(language %in% c("English","english","ENGLISH","English language","Englsih", "United States","englsh","ENG","enhlish","englsi","englishjm", "english ","English ","ENGLISH ", "American English", "English  "))) %>%
+  select(workerid)
+
+non_native
+
+#EXCLUDE WORKERS --> LANGUAGE - non-native (33 people!!!)
+df <-df[!(df$workerid %in% non_native$workerid),]
+
 #TIME
 times = df %>%
-  select(workerid,Answer.time_in_minutes) %>%
+  select(workerid, Answer.time_in_minutes, speaker_cond) %>%
   unique()
 
 ggplot(times, aes(x=Answer.time_in_minutes)) +
   geom_histogram()
 
 fast_workers = times %>%
-  filter(Answer.time_in_minutes<6) %>%
+  filter(Answer.time_in_minutes<4) %>%
   select(workerid)
 fast_workers
+
+ggplot(times %>% filter(speaker_cond == "exp15"), aes(x=Answer.time_in_minutes, fill=speaker_cond))+
+  geom_histogram()+
+  theme(legend.position="none")
+
+times %>% 
+  filter(Answer.time_in_minutes<6)  %>%
+  count(speaker_cond) %>%
+  arrange(desc(n))
+
+ms = times  %>%
+  group_by(speaker_cond) %>%
+  mutate(Mean = mean(Answer.time_in_minutes),  Median = median(Answer.time_in_minutes))
+
+ggplot(ms, aes(Mean)) +
+  geom_histogram()
+
+ggplot(ms, aes(Median)) +
+  geom_histogram()
+
+ggplot(ms, aes(x=Mean,y=Median)) +
+  geom_point() +
+  geom_text(aes(label=speaker_cond),nudge_x = .3, nudge_y= -.3)
 
 #EXCLUDE WORKERS --> TIME - less than 6 minutes
 df <-df[!(df$workerid %in% fast_workers$workerid),]
@@ -82,12 +122,18 @@ sentences = df %>%
 #overall distribution of responses
 agr = sentences %>%
   group_by(tgrep_id) %>%
-  summarize(Median=median(rating),Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating)) %>%
+  summarize(Median=median(rating),Mean=mean(rating),CILow=ci.low(rating),CIHigh=ci.high(rating),SD=sd(rating),Var=var(rating)) %>%
   ungroup() %>%
-  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Mean))
+  mutate(YMin=Mean-CILow,YMax=Mean+CIHigh,OrderedTGrep=fct_reorder(tgrep_id,Median))
 
 sentences = sentences %>%
   left_join(agr,by=c("tgrep_id"))
+
+#Create CSV with 4 columns: tgrep_id, mean, median, variance
+d = agr %>% 
+  select(tgrep_id, Mean, Median, Var)
+
+write.csv(d, file = "summary.csv")
 
 ggplot(agr, aes(x=Mean)) +
   geom_histogram() +
@@ -97,13 +143,23 @@ ggplot(agr, aes(x=Mean)) +
 ggplot(agr, aes(x=OrderedTGrep,y=Mean)) +
   geom_bar(stat="identity",fill = "lightblue3") +
   geom_errorbar(aes(ymin = YMin, ymax = YMax),width=.25) +
-  geom_point(data=sentences, aes(y = rating,color = as.factor(workerid)),alpha=.2) + #,color="gray40",alpha=.2) +
-  geom_point(aes(y=Median),color="orange",size=4) +
+  #geom_point(data=sentences, aes(y = rating,color = as.factor(workerid)),alpha=.2) + #,color="gray40",alpha=.2) +
+  geom_point(aes(y=Median),color="orange",size=2) +
   labs(title = "Mean rating by item")+
   theme(plot.title = element_text(hjust =0.5),axis.text.x=element_text(angle=45,hjust=1,vjust=1))
 
+lowmedians = as.character(agr[agr$Median < .1,]$tgrep_id)
+lowmedians
+lowmeans = as.character(agr[agr$Mean <.28,]$tgrep_id)
+lowmeans 
+
+highmedians = as.character(agr[agr$Median > .95,]$tgrep_id)
+highmedians
+highmeans = as.character(agr[agr$Mean >.78,]$tgrep_id)
+highmeans
+
 #save graphs with different exclusions
-ggsave(file="../graphs/mean_rating.pdf",width=8,height=3)
+ggsave(file="../graphs/mean_rating.pdf",width=35,height=3)
 ggsave(file="../graphs/mean_rating_extime7.pdf",width=8, height=3)
 ggsave(file="../graphs/mean_rating_exvar2.pdf",width=8, height=3)
 

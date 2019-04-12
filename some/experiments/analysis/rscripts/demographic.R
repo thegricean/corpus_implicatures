@@ -4,7 +4,7 @@ setwd('../data')
 d = read.csv("subject-info_merged.csv", header = TRUE)
 
 # look at comments
-unique(d$comments)
+unique(d$comments,d$workerid)
 
 # fair price
 ggplot(d, aes(x=fairprice)) +
@@ -13,7 +13,6 @@ ggplot(d, aes(x=fairprice)) +
 # overall assessment
 ggplot(d, aes(x=asses)) +
   geom_histogram(stat="count")
-table(d$asses, d$workerid)
 
 # enjoyment (3 levels)
 ggplot(d, aes(x=enjoyment)) +
@@ -33,16 +32,15 @@ ggplot(d, aes(x=education)) +
 
 # language
 ggplot(d, aes(x=language)) +
-  geom_histogram(stat="count")
+  geom_histogram(stat="count") +
+  theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1))
 
 # average time 
-df = read.csv("example-trials.csv", header = TRUE)
+df = read.csv("results_formatted.csv", header = TRUE)
 
 times = df %>%
   select(workerid,Answer.time_in_minutes) %>%
   unique()
-
-times
 
 times = times %>% 
   left_join(d,by = c("workerid"))
