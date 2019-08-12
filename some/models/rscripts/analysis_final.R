@@ -344,7 +344,7 @@ ggplot(d_elmo_lstmattn_context,aes(x=predicted,y=original_mean,color=Dataset)) +
   facet_wrap(~Dataset)
 ggsave(file="../graphs/scatter_elmo_lstmattn_context.pdf",width=5.5,height=3)
 
-# compare the best lstim+attention model to hand-mined model predictions
+# compare the best lstm+attention model to hand-mined model predictions
 preds = d_elmo_lstmattn_context %>%
   select(Item_ID,predicted,Dataset)
 colnames(preds) = c("Item","PredictedMean","Dataset")
@@ -357,14 +357,24 @@ library(lmerTest)
 # To run the regression reported in Degen 2015:
 centered = cbind(md, myCenter(md[,c("StrengthSome","logSentenceLength","Pronoun","BinaryGF","InfoStatus","DAModification","Modification","Partitive","redInfoStatus","numDA","PredictedMean")]))
 
+# model (original) with full mixed effects structure (minus item variability) on training + eval data
 m.fixed = lmer(Rating ~ cPartitive*cStrengthSome+credInfoStatus*cBinaryGF*cModification + clogSentenceLength + (1|workerid) + (0 + cPartitive|workerid) + (0 + cStrengthSome|workerid) + (0 + credInfoStatus|workerid) + (0 + cBinaryGF|workerid) + (0+cModification|workerid) + (0 + cPartitive:cStrengthSome|workerid), data=centered %>% filter())
 summary(m.fixed)
 
 m.neural = lmer(Rating ~ cPredictedMean + (1|workerid), data=centered)
 summary(m.neural)
 
+# model (original+neural) with full mixed effects structure (minus item variability) on training + eval data
 m.fixed.neural = lmer(Rating ~ cPredictedMean + cPartitive*cStrengthSome+credInfoStatus*cBinaryGF*cModification + clogSentenceLength + (1|workerid) + (0 + cPartitive|workerid) + (0 + cStrengthSome|workerid) + (0 + credInfoStatus|workerid) + (0 + cBinaryGF|workerid) + (0+cModification|workerid) + (0 + cPartitive:cStrengthSome|workerid) , data=centered)
 fnsummary = summary(m.fixed.neural)
+
+# model (original) with only random by-workerid effects on eval data
+m.fixed.eval = lmer(Rating ~ cPartitive*cStrengthSome+credInfoStatus*cBinaryGF*cModification + clogSentenceLength + (1|workerid), data=centered %>% filter(Dataset == "evaluation"))
+summary(m.fixed.eval)
+
+# model (original+neural) with only random by-workerid effects on eval data
+m.fixed.neural.eval = lmer(Rating ~ cPredictedMean + cPartitive*cStrengthSome+credInfoStatus*cBinaryGF*cModification + clogSentenceLength + (1|workerid), data=centered %>% filter(Dataset == "evaluation"))
+summary(m.fixed.neural.eval)
 
 coefs = as.data.frame(fnsummary$coefficients)
 summary(coefs)
