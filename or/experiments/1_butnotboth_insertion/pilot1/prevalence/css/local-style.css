@@ -1,0 +1,67 @@
+.slider {
+  /* default is width 400 and margin 10 */
+	width: 400;
+	margin: 10px;
+}
+.hidden { 
+    display: none; }
+
+.unhidden { 
+    display: block; }
+
+.arcButton {
+    background-color: white; /* Green */
+    border: none;
+    color: black;
+    padding: 3px 0px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 22px;
+    margin: 0px 0px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.arcButton:hover{
+    background-color:#f44336; /*Green*/
+}
+
+.instruction{
+    color:#424242;
+    text-align: justify;
+    font-size: 16px;
+    padding-top: .6em;
+    padding-bottom: .5em;
+	 
+}
+.targetSen{
+    text-align:center;
+    font-size:22;
+}
+.notBoth{
+    color: red;
+    font-size:22;
+}
+.row {
+    padding-bottom: .5em;
+}
+.retryButton{
+    font-color: black;
+    padding: 1px 8px;
+  
+}
+.retryButton:hover{
+    background-color: #f44336;
+    padding: 1px 8px;
+}
+.continueButton{
+    padding: 1px 8px;
+}
+
+.continueButton:hover{
+   background-color: #008CBA;
+   padding: 1px 8px;
+}
+

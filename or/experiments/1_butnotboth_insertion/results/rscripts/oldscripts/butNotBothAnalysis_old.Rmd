@@ -1,0 +1,126 @@
+---
+title: "Analysis of 'but not both' experiment"
+author: "jdegen"
+date: "Dec 14, 2017"
+output: html_document
+---
+
+## Goal
+
+Figure out, for each case, whether it's worth running it in the scalar implicature experiment (ie, analogous to the "some" paper, comparing original sentence to one with potentially implicated content locally explicit).
+
+## To determine
+What is the best "but not both" sentence selection criterion, of the three we have? Neele's initial pilot analysis suggested that the modal response was best for 25 of 30 sentences. In general: the modal response seems best for cases that receive only few different responses. For cases with more diversity in responses, selecting the case with the greatest proportion of "good location" responses seems to work best.  
+
+Questions that need to be answered:
+
+1. Is it even worth running sentences with too low of a proportion of "good location" responses? What is a reasonable cutoff point for proportion of "good location" responses?
+2. What is the cutoff point for number of different lcoations of "but not both" above which we should deviate from the modal response selection method?
+3. Which cases need to be looked at manually, if any?
+
+Selection criteria:
+
+1. **Include** cases where all three response selection methods yield the same result and **select modal response**.
+2. **Exclude** cases with lower than XXX (10-20%)% "good location" responses. (If 1. and 2. are in conflict, include or exclude? Hand-check some responses to come up with general rule)
+3. **Include** cases with higher than XXX (70-80)% "good location" responses. If selection methods are in conflict:
+  - if fewer than (3(oder2))XXX different responses were generated, **select modal response**
+  - if more than (3)XXX different responses were generated, **exclude**
+  - else, **select proportion response**
+
+## Columns
+
+- **tgrep.id/TGrepID:** unique TGrep2 ID
+- **Num_different_BNBForms/NumBNBForms**: number of different locations for "but not both" that were generated
+- **Proportion_goodLoc_perBNB/PropGoodLocation:** proportion of participants that rated the case as having a good location for "but not both" -- Neele, what is "the case" here? Ie if modal response etc differ, what does this column code?
+- **modal_response/ResponseModal:** the most frequently given response
+- **best_location_.frequency/ResponseFreqGoodLocation:** the response with greatest frequency of "good location" responses
+- **best_location_.proportion/ResponsePropGoodLocation:** the response with greatest proportion of "good location" responses
+- **sentence_overlap/SentenceOverlap:** do all three methods for selecting the best response yield the same result?
+
+Load packages, read the data, rename columns, compute sentence length (will be twice as long for sentences with two best responses), create an empty new column with final sentence to use.
+```{r}
+library(tidyverse)
+library(knitr)
+d = read.table("../data/final.csv",header=T,sep="\t",quote="")
+colnames(d) = c("TGrepID","NumBNBForms","PropGoodLocation","ResponseModal","ResponseFreqGoodLocation","ResponsePropGoodLocation","SentenceOverlap")
+d$BNBSentenceLength = nchar(as.character(d$ResponseModal))
+d$FinalBNBSentence = ""
+```
+There are `r {nrow(d)}` cases.
+
+## Selection process
+
+### **Include** cases where all three response selection methods yield the same result and **select modal response**.
+
+In about half (`r {nrow(d[d$SentenceOverlap == T,])}`) of the cases the same "but not both" sentence is chosen regardless of choice criterion. Some of those sentences:
+
+```{r}
+table(d$SentenceOverlap)
+sample(d[d$SentenceOverlap == T,]$ResponseModal,5)
+```
+
+Problem: there appear to be a number of cases where the modal response contains more than 2 responses, even among cases that have overlap in all three measures.
+```{r}
+length(grep("  |  ",as.character(d$ResponseModal),fixed=T))
+d[grep("  |  ",as.character(d$ResponseModal),fixed=T),]$ResponseModal
+d$MoreThanOneModalResponse = FALSE
+d[grep("  |  ",as.character(d$ResponseModal),fixed=T),]$MoreThanOneModalResponse = TRUE
+table(d$MoreThanOneModalResponse)
+table(d$SentenceOverlap,d$MoreThanOneModalResponse)
+```
+
+Let's look at the `r {nrow(d[d$SentenceOverlap & d$MoreThanOneModalResponse,])}` cases with overlap that nevertheless include more than one response -- what should we do with these?
+
+```{r}
+d[d$SentenceOverlap & d$MoreThanOneModalResponse,]$ResponseModal
+```
+
+**Decision:** In each of these cases, include the one with 'but not both' earlier in the sentence (ie closer to 'or'). Neele, add code that extracts these in addition to this line of code that just extracts the modal response for the ones with complete overlap and only one best response:
+
+```{r}
+d[d$SentenceOverlap & !d$MoreThanOneModalResponse,]$FinalBNBSentence = as.character(d[d$SentenceOverlap & !d$MoreThanOneModalResponse,]$ResponseModal)
+```
+
+### **Exclude** cases with lower than XXX (10-20%)% "good location" responses.
+
+For the cases that don't include the already included cases from 1, what is the distribution of proportion of good locations?
+
+```{r}
+dsub = d %>%
+  filter(!d$SentenceOverlap)
+ggplot(dsub, aes(x=PropGoodLocation)) +
+  geom_histogram()
+```
+
+Is there a correlation between proportion of good location and number of BNB forms? Yes, a weak one.
+
+```{r}
+ggplot(dsub, aes(x=NumBNBForms,y=PropGoodLocation)) +
+  geom_jitter() +
+  geom_smooth(method="loess")
+cor(dsub$NumBNBForms,dsub$PropGoodLocation)
+```
+
+Is there a correlation between sentence length and both a) proportion of good location and b) number of BNB forms? Yes, a weak one.
+
+```{r}
+ggplot(dsub, aes(x=BNBSentenceLength,y=PropGoodLocation)) +
+  geom_point() +
+  geom_smooth(method="loess")
+
+ggplot(dsub, aes(x=BNBSentenceLength,y=NumBNBForms)) +
+  geom_jitter() +
+  geom_smooth(method="loess")
+```
+
+Start by looking at the cases with large number of BNB forms -- exlude?
+
+```{r}
+nrow(dsub[dsub$NumBNBForms > 4,])
+kable(dsub[dsub$NumBNBForms > 4,c("ResponseModal","ResponseFreqGoodLocation","ResponsePropGoodLocation")])
+```
+
+
+### NExt steps
+
+Before using above selection criteria, Neele will generate new "best response" column that is result of choosing the case where "but not both" is closest to "or" but doesn't come right after it. Then we do the above comparison again.
