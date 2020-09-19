@@ -2,6 +2,7 @@ require(tidyverse)
 library(stringr)
 library(magrittr)
 library(lmerTest)
+library(MuMIn)
 # library(brms) # run later
 
 # set working directory to directory of script
@@ -206,6 +207,8 @@ ggplot(means, aes(x=MeanPredicted,y=MeanEmpirical)) +
   xlab("Predicted rating")
 ggsave("../graphs/model_fit_fixed.pdf",width=5,height=4)
 cor(means$MeanEmpirical,means$MeanPredicted)
+r.squaredGLMM(m.noitems) 
+vif.mer(m.noitems) # no relevant collinearity
 
 # add fixed effects of interest plus random item variability
 m.items = lmer(response_val ~  cDE + cAnd_test + Or_both_test + cNumeral + Disjunct_relation + ceitherPresent + corNotPresent + cActually_test + credSentenceType +  cresponse_goodsentence + clogSentenceLength + cTrial + (1|workerid) + (1|tgrep.id), data=centered) 
