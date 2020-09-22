@@ -105,10 +105,10 @@ function make_slides(f) {
     start: function () {
       $(".err").hide();
 
-      var contexthtml = ""
-      var entirehtml = ""
+      var contexthtml = "<b>Speaker #1</b>: Do you have any plans for Thanksgiving? <br> <b>Speaker #2</b>: I'm not sure yet,"
+      var entirehtml = "<font color=#FF0000> " + "I might go to California or stay here."
       contexthtml = contexthtml+entirehtml
-      var besthtml = ""
+      var besthtml = "<font color=#0000FF> " + "I might go to California or stay here <b>but not both</b>."
 
       $(".context").html(contexthtml);
       $(".BestResponse").html(besthtml);
