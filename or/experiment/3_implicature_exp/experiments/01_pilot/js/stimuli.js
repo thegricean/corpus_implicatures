@@ -1,5 +1,5 @@
 
-var path = 'https://raw.githubusercontent.com/thegricean/corpus_implicatures/master/or/experiment/3_implicature_exp/better_korpus/korpus3_0.txt'
+var path = 'https://raw.githubusercontent.com/thegricean/corpus_implicatures/master/or/experiment/3_implicature_exp/better_bnb_korpus/korpus3_0.txt'
 console.log(path);
  
 function get_data(fullpath) {
