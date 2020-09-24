@@ -1,12 +1,5 @@
-//var path = 'https://web.stanford.edu/~chakia/CoCoLab/corpus_generics/generics_project/results/';
-//var fname = 'sample19_plus.tab';
 
-//var path = 'https://raw.githubusercontent.com/Blubberli/Blubberli.github.io/master/prevalence/korpus/korpus3_35txt';
-
-//leyla deneme
-//var path = 'https://raw.githubusercontent.com/leylakursat/some_without_context/master/experiment/corpora/corpus1.txt';
-
-var path = 'https://raw.githubusercontent.com/thegricean/corpus_implicatures/master/or/experiments/3_implicature_exp/korpus/korpus3_0txt'
+var path = 'https://raw.githubusercontent.com/thegricean/corpus_implicatures/master/or/experiment/3_implicature_exp/better_bnb_korpus/korpus3_10.txt'
 console.log(path);
  
 function get_data(fullpath) {

@@ -106,7 +106,7 @@ function make_slides(f) {
       $(".err").hide();
 
       var contexthtml = "<b>Speaker #1</b>: Do your employees speak any language besides English? <br> <b>Speaker #2</b>: "
-      var entirehtml = "<font color=#FF0000> " + "All our employees also speak at least French or Spanish"
+      var entirehtml = "<font color=#FF0000> " + "All our employees also speak at least French or Spanish."
       contexthtml = contexthtml+entirehtml
       var besthtml = "<font color=#0000FF> " + "All our employees also speak at least French or Spanish <b>but not both</b>."
 
@@ -188,10 +188,16 @@ function make_slides(f) {
     },
 
     format_context: function (context) {
-      contexthtml = context.replace(/###SpeakerA(\d+).(\d+)?t(\d+)(.\d+)? ./g, "<br><b>Speaker #1:</b>");
+      contexthtml = context.replace(/###SpeakerA(\d+).(\d+)?t(\d+)(.\d+)? ./g, "<br><b>Speaker #1:</b>"); // ###SpeakerA55-2*t55-2, SpeakerA53*t53
+      contexthtml = contexthtml.replace(/###SpeakerA(\d+)?\*t(\d+)? ./g, "<br><b>Speaker #1:</b>"); // ###SpeakerA53*t53
+      contexthtml = contexthtml.replace(/###SpeakerA(\d+)?-(\d+)?\*t(\d+)?-(\d+)? ./g, "<br><b>Speaker #1:</b>"); // ###SpeakerA55-2*t55-2, SpeakerA53*t53
+      contexthtml = contexthtml.replace(/###SpeakerANaN\*t(\d+)-(\d+) ./g, "<br><b>Speaker #1:</b>"); // ###SpeakerANaN*t55-1
+      contexthtml = contexthtml.replace(/###SpeakerB(\d+).t(\d+) ./g, "<br><b>Speaker #2:</b>"); // ###SpeakerB0*t60 
+      contexthtml = contexthtml.replace(/###SpeakerB(\d+)?\*t(\d+)? ./g, "<br><b>Speaker #2:</b>"); // ###SpeakerA55-2*t55-2, SpeakerA53*t53
+      contexthtml = contexthtml.replace(/###SpeakerB(\d+)?-(\d+)?\*t(\d+)?-(\d+)? ./g, "<br><b>Speaker #2:</b>"); // 
+      contexthtml = contexthtml.replace(/###SpeakerBNaN\*t(\d+)-(\d+) ./g, "<br><b>Speaker #2:</b>"); //###SpeakerBNaN*t57-2
       contexthtml = contexthtml.replace(/E_S/g, "");
       contexthtml = contexthtml.replace(/(\\\[| \\\+|\\\])/g, "");
-      contexthtml = contexthtml.replace(/###SpeakerB(\d+).t(\d+) ./g, "<br><b>Speaker #2:</b>");
       contexthtml = contexthtml.replace(/-N((\d+)|[A-Z]+)+/g, "");
       contexthtml = contexthtml.replace(/###/g, "");
       contexthtml = contexthtml.replace(/ ,/g, ",");
@@ -269,7 +275,10 @@ function make_slides(f) {
         "subject_information": exp.subj_data,
         "time_in_minutes": (Date.now() - exp.startT) / 60000
       };
-      setTimeout(function () { turk.submit(exp.data); }, 1000);
+      setTimeout(function () { proliferate.submit(exp.data); }, 1000);
+
+      
+
     }
   });
 
@@ -292,6 +301,7 @@ function init() {
   console.log(stimuli.length);
   //exp.stimuli = _.shuffle(stimuli).slice(0, 15);
   exp.stimuli = stimuli.slice();
+  exp.stimuli = _.shuffle(exp.stimuli);
   exp.n_trials = exp.stimuli.length;
   exp.stimcounter = 0;
 

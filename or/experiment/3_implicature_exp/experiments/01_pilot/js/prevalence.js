@@ -106,7 +106,7 @@ function make_slides(f) {
       $(".err").hide();
 
       var contexthtml = "<b>Speaker #1</b>: Do your employees speak any language besides English? <br> <b>Speaker #2</b>: "
-      var entirehtml = "<font color=#FF0000> " + "All our employees also speak at least French or Spanish"
+      var entirehtml = "<font color=#FF0000> " + "All our employees also speak at least French or Spanish."
       contexthtml = contexthtml+entirehtml
       var besthtml = "<font color=#0000FF> " + "All our employees also speak at least French or Spanish <b>but not both</b>."
 
