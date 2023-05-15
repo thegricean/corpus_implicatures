@@ -26,6 +26,6 @@ def tsv2json(input_file,output_file):
         output_file.write(json.dumps(arr, indent=4))
         output_file.write(";")
 
-input_filename = 'corpus01.txt'
-output_filename = 'corpus01.json'
+input_filename = 'items.txt'
+output_filename = 'items.json'
 tsv2json(input_filename,output_filename)        
